@@ -8,18 +8,17 @@
 
 #import "HXPhotoSlideUnlock.h"
 
-#define BtnHeight 32
-#define BtnWidth 72
-#define ClipWH 30
-#define Space 6
-static CGRect clipRect;
+#define BtnHeight 32  //拖动按钮高度
+#define BtnWidth 72  //拖动按钮宽度
+#define ClipWH 30  //裁剪图片的大小
+#define Space 6  //间距
+static CGRect clipRect;  //裁剪位置
 
 @interface HXPhotoSlideUnlock()
-@property (nonatomic, strong) HXRespondButton *respondBtn;
-@property (nonatomic, strong) UIImageView *imageView;
-@property (nonatomic, strong) UIImage  *clipImage;
-@property (nonatomic, strong) UIView *rimView;
-@property (nonatomic, strong) UIImageView *successImage;
+@property (nonatomic, strong) HXRespondButton *respondBtn;//拖动按钮
+@property (nonatomic, strong) UIImageView *imageView;//
+@property (nonatomic, strong) UIView *rimView;//拖动框
+@property (nonatomic, strong) UIImageView *successImageView;
 @end
 
 @implementation HXPhotoSlideUnlock
@@ -37,14 +36,16 @@ static CGRect clipRect;
     [super layoutSubviews];
     UIImage *image = [self getImage];
     CGSize size = image.size;
+    //根据图片大小 调整拖动框宽度
     self.rimView.frame = CGRectMake(0, 0, size.width, BtnHeight);
     [self.respondBtn setFrame:CGRectMake(0, 0, BtnWidth, BtnHeight)];
-    self.respondBtn.maxWidth = size.width;
+    self.respondBtn.maxWidth = size.width; //高度拖动按钮  最多能拖动多长
     self.imageView.frame = CGRectMake(0, 0 - size.height - Space, size.width, size.height);
 }
 
+//显示验证图
 -(void)showImage{
-    [self.successImage removeFromSuperview];
+    [self.successImageView removeFromSuperview];
     self.imageView.hidden = NO;
     self.respondBtn.isHiddenClipImage = NO;
     UIImage *image = [self getImage];
@@ -58,13 +59,14 @@ static CGRect clipRect;
     self.respondBtn.clipImageRect = recc;
 }
 
+//隐藏验证图
 -(void)hiddenImage{
     CGRect frame = self.respondBtn.frame;
     CGFloat moveX = frame.origin.x + (BtnWidth - ClipWH)*0.5;
     if (fabs(clipRect.origin.x - moveX) < 5) {//验证成功
         self.imageView.hidden = NO;
         self.respondBtn.isHiddenClipImage = NO;
-        [self.rimView addSubview:self.successImage];
+        [self.rimView addSubview:self.successImageView];
         self.respondBtn.userInteractionEnabled = NO;
         self.result = YES;
     }else{//验证失败
@@ -81,6 +83,7 @@ static CGRect clipRect;
     }
 }
 
+//截大图
 - (void)setUpImageViewWithImage:(UIImage *)image Rect:(CGRect)rect{
     CGSize size = image.size;
     UIGraphicsBeginImageContextWithOptions(size, NO, 0);
@@ -92,6 +95,7 @@ static CGRect clipRect;
     self.imageView.image = newImage;
 }
 
+//截小图
 - (UIImage *)getCilpImageWithImage:(UIImage *)image  Rect:(CGRect)rect{
     CGImageRef imageRef = CGImageCreateWithImageInRect(image.CGImage, rect);
     UIGraphicsBeginImageContext(image.size);
@@ -102,6 +106,7 @@ static CGRect clipRect;
     return newImage;
 }
 
+#pragma 工具方法
 - (UIImage *)getImage{
     NSString *imageName = self.imageArray[[self getRandomNumber:0 to:self.imageArray.count - 1]];
     return [UIImage imageNamed:imageName];
@@ -112,6 +117,7 @@ static CGRect clipRect;
     return (unsigned long)(from + (arc4random() % (to - from + 1)));
 }
 
+#pragma 懒加载
 -(UIImageView *)imageView{
     if (!_imageView) {
         _imageView = [[UIImageView alloc]init];
@@ -144,12 +150,12 @@ static CGRect clipRect;
     return _respondBtn;
 }
 
-- (UIImageView *)successImage{
-    if (!_successImage) {
-        _successImage = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"yes1"]];
-        _successImage.frame = CGRectMake(CGRectGetMaxX(self.rimView.frame) + Space, 0, 32, 32);
+- (UIImageView *)successImageView{
+    if (!_successImageView) {
+        _successImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"yes1"]];
+        _successImageView.frame = CGRectMake(CGRectGetMaxX(self.rimView.frame) + Space, 0, 32, 32);
     }
-    return _successImage;
+    return _successImageView;
 }
 @end
 
@@ -182,6 +188,7 @@ static CGRect clipRect;
     return _clipImageView;
 }
 
+//按钮的拖动
 - (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     CGRect temp = self.frame;
     UITouch *touch = [touches anyObject];
