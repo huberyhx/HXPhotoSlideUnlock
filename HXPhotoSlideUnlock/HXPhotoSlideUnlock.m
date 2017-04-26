@@ -104,6 +104,12 @@ static CGRect clipRect;  //裁剪位置
     UIImage *newImage = [UIImage imageWithCGImage:imageRef];
     UIGraphicsEndImageContext();
     return newImage;
+    
+    /**
+     这种方法也可
+     CGImageRef imageR = CGImageCreateWithImageInRect(image.CGImage, rect);
+     return [UIImage imageWithCGImage:imageR];
+     */
 }
 
 #pragma 工具方法
