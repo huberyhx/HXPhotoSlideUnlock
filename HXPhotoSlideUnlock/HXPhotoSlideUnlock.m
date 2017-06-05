@@ -69,12 +69,15 @@ static CGRect clipRect;  //裁剪位置
 -(void)hiddenImage{
     CGRect frame = self.respondBtn.frame;
     CGFloat moveX = frame.origin.x + (BtnWidth - ClipWH)*0.5;
-    if (fabs(clipRect.origin.x - moveX) < 5) {//验证成功
+    if (fabs(clipRect.origin.x - moveX) < 2) {//验证成功
         self.imageView.hidden = NO;
         self.respondBtn.isHiddenClipImage = NO;
         [self.rimView addSubview:self.successImageView];
         self.respondBtn.userInteractionEnabled = NO;
         self.result = YES;
+        /**
+         * 验证成功后闪亮一下
+         */
         [self.imageView.layer addSublayer:self.gradientLayer];
     }else{//验证失败
         self.result = NO;
@@ -121,13 +124,6 @@ static CGRect clipRect;  //裁剪位置
      CGImageRef imageR = CGImageCreateWithImageInRect(image.CGImage, rect);
      return [UIImage imageWithCGImage:imageR];
      */
-}
-
-/**
- * 验证成功后闪亮一下
- */
-- (void)successAnima{
-    
 }
 
 #pragma 工具方法
