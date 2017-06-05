@@ -14,11 +14,13 @@
 #define Space 6  //间距
 static CGRect clipRect;  //裁剪位置
 
-@interface HXPhotoSlideUnlock()
+@interface HXPhotoSlideUnlock()<CAAnimationDelegate>
 @property (nonatomic, strong) HXRespondButton *respondBtn;//拖动按钮
 @property (nonatomic, strong) UIImageView *imageView;//
 @property (nonatomic, strong) UIView *rimView;//拖动框
 @property (nonatomic, strong) UIImageView *successImageView;
+@property(nonatomic,strong) CAGradientLayer *gradientLayer;
+@property(nonatomic,strong) CABasicAnimation *anima;
 @end
 
 @implementation HXPhotoSlideUnlock
@@ -43,7 +45,9 @@ static CGRect clipRect;  //裁剪位置
     self.imageView.frame = CGRectMake(0, 0 - size.height - Space, size.width, size.height);
 }
 
-//显示验证图
+/**
+ * 显示验证图
+ */
 -(void)showImage{
     [self.successImageView removeFromSuperview];
     self.imageView.hidden = NO;
@@ -59,7 +63,9 @@ static CGRect clipRect;  //裁剪位置
     self.respondBtn.clipImageRect = recc;
 }
 
-//隐藏验证图
+/**
+ * 隐藏验证图
+ */
 -(void)hiddenImage{
     CGRect frame = self.respondBtn.frame;
     CGFloat moveX = frame.origin.x + (BtnWidth - ClipWH)*0.5;
@@ -69,6 +75,7 @@ static CGRect clipRect;  //裁剪位置
         [self.rimView addSubview:self.successImageView];
         self.respondBtn.userInteractionEnabled = NO;
         self.result = YES;
+        [self.imageView.layer addSublayer:self.gradientLayer];
     }else{//验证失败
         self.result = NO;
         self.respondBtn.userInteractionEnabled = YES;
@@ -83,7 +90,9 @@ static CGRect clipRect;  //裁剪位置
     }
 }
 
-//截大图
+/**
+ * 截大图
+ */
 - (void)setUpImageViewWithImage:(UIImage *)image Rect:(CGRect)rect{
     CGSize size = image.size;
     UIGraphicsBeginImageContextWithOptions(size, NO, 0);
@@ -95,7 +104,9 @@ static CGRect clipRect;  //裁剪位置
     self.imageView.image = newImage;
 }
 
-//截小图
+/**
+ * 截小图
+ */
 - (UIImage *)getCilpImageWithImage:(UIImage *)image  Rect:(CGRect)rect{
     CGImageRef imageRef = CGImageCreateWithImageInRect(image.CGImage, rect);
     UIGraphicsBeginImageContext(image.size);
@@ -112,6 +123,13 @@ static CGRect clipRect;  //裁剪位置
      */
 }
 
+/**
+ * 验证成功后闪亮一下
+ */
+- (void)successAnima{
+    
+}
+
 #pragma 工具方法
 - (UIImage *)getImage{
     NSString *imageName = self.imageArray[[self getRandomNumber:0 to:self.imageArray.count - 1]];
@@ -124,6 +142,9 @@ static CGRect clipRect;  //裁剪位置
 }
 
 #pragma 懒加载
+/**
+ * 图片View
+ */
 -(UIImageView *)imageView{
     if (!_imageView) {
         _imageView = [[UIImageView alloc]init];
@@ -136,6 +157,9 @@ static CGRect clipRect;  //裁剪位置
     return _imageView;
 }
 
+/**
+ * 边框View
+ */
 - (UIView *)rimView{
     if (!_rimView) {
         _rimView = [[UIView alloc]init];
@@ -146,6 +170,9 @@ static CGRect clipRect;  //裁剪位置
     return _rimView;
 }
 
+/**
+ * 拖动按钮
+ */
 - (HXRespondButton *)respondBtn{
     if (!_respondBtn) {
         _respondBtn = [HXRespondButton buttonWithType:UIButtonTypeCustom];
@@ -156,12 +183,62 @@ static CGRect clipRect;  //裁剪位置
     return _respondBtn;
 }
 
+/**
+ * 对勾View
+ */
 - (UIImageView *)successImageView{
     if (!_successImageView) {
         _successImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"yes1"]];
         _successImageView.frame = CGRectMake(CGRectGetMaxX(self.rimView.frame) + Space, 0, 32, 32);
     }
     return _successImageView;
+}
+
+/**
+ * 渐变View
+ */
+- (CAGradientLayer *)gradientLayer{
+    if (!_gradientLayer) {
+        _gradientLayer =[CAGradientLayer layer];
+        _gradientLayer.frame = self.imageView.bounds;
+//        _gradientLayer.
+        _gradientLayer.startPoint = CGPointMake(1, 0);
+        _gradientLayer.endPoint = CGPointMake(0, 1);
+        _gradientLayer.colors =   @[
+                                                      (__bridge id)[UIColor colorWithRed:0.1 green:0.1 blue:0.1 alpha:0].CGColor,
+                                                      (__bridge id)[UIColor colorWithRed:1 green:1 blue:1 alpha:0.6].CGColor,
+                                                      (__bridge id)[UIColor colorWithRed:0.1 green:0.1 blue:0.1 alpha:0].CGColor
+                                                      ];
+        _gradientLayer.locations = @[@0.25,@0.5,@0.75];
+        /**
+         * 为渐变View添加动画
+         */
+        [_gradientLayer addAnimation:self.anima forKey:nil];
+    }
+    return _gradientLayer;
+}
+
+- (CABasicAnimation *)anima{
+    if (!_anima) {
+        _anima = [CABasicAnimation animationWithKeyPath:@"locations"];
+        _anima.delegate = self;
+        _anima.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        _anima.fromValue = @[@0.0,@0.0,@0.25];
+        _anima.toValue = @[@0.75,@1.0,@1.0];
+        _anima.duration = 0.5;
+        _anima.repeatCount = 1;
+        _anima.removedOnCompletion = NO;
+        _anima.fillMode = kCAFillModeForwards;
+    }
+    return _anima;
+}
+
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
+    [self.gradientLayer removeFromSuperlayer];
+    /**
+     * 强delegate 要置nil
+     */
+    self.anima.delegate = nil;
 }
 @end
 
