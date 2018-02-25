@@ -1,7 +1,8 @@
 最近公司项目中用到解锁码功能,赶巧今天又加班，就用Quartz2D尝试模仿网页的滑动图片解锁做了个Demo
-[这是Demo地址](https://github.com/huberyhx/HXPhotoSlideUnlock.git)
 效果图:
+
 ![效果图](http://upload-images.jianshu.io/upload_images/2954364-6cc9d79589adc678.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 ![gif图](http://upload-images.jianshu.io/upload_images/2954364-885e99510defc18e.gif?imageMogr2/auto-orient/strip)
 
 
